@@ -1,5 +1,6 @@
 package fr.natsu.artemis.render;
 
+import fr.natsu.artemis.Artemis;
 import fr.natsu.artemis.LunarHost;
 import org.lwjgl.BufferUtils;
 import java.nio.IntBuffer;
@@ -55,6 +56,7 @@ public final class GlowFramebuffer {
         OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, 0);
     }
 
+    private static long lastDiagnostic;
     private int previousFramebuffer = -1;
     private final int[] previousViewport = new int[4];
 
@@ -64,6 +66,15 @@ public final class GlowFramebuffer {
             IntBuffer viewport = BufferUtils.createIntBuffer(16);
             GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
             viewport.get(this.previousViewport, 0, 4);
+        }
+        if (LunarHost.isLunar() && System.currentTimeMillis() - lastDiagnostic > 5000L) {
+            lastDiagnostic = System.currentTimeMillis();
+            Minecraft mc = Minecraft.getMinecraft();
+            Artemis.LOGGER.info("[Glow] diag fbo={} viewport={}x{}@{},{} ours={}x{} display={}x{} mcFramebuffer={}x{} fboEnabled={}",
+                this.previousFramebuffer, this.previousViewport[2], this.previousViewport[3],
+                this.previousViewport[0], this.previousViewport[1], this.width, this.height,
+                mc.displayWidth, mc.displayHeight, mc.getFramebuffer().framebufferWidth,
+                mc.getFramebuffer().framebufferHeight, OpenGlHelper.isFramebufferEnabled());
         }
         OpenGlHelper.glBindFramebuffer(OpenGlHelper.GL_FRAMEBUFFER, this.framebufferObject);
         GL11.glViewport(0, 0, this.width, this.height);

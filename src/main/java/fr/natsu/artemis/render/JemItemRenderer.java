@@ -3,7 +3,6 @@ package fr.natsu.artemis.render;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.natsu.artemis.module.model.JemAnimation;
 import fr.natsu.artemis.module.model.JemModel;
 import fr.natsu.artemis.module.model.ModelAnimator;
 import fr.natsu.artemis.module.model.ModelRegistry;
@@ -82,9 +81,8 @@ public final class JemItemRenderer {
             return null;
         }
         model.resetAnimation();
-        JemAnimation animation = ModelRegistry.getAnimation(entry.animationPath, entry.animationName);
-        if (animation != null) {
-            ModelAnimator.apply(model, animation, Minecraft.getSystemTime() / 1000.0D);
+        if (!entry.animations.isEmpty()) {
+            ModelAnimator.apply(model, entry.animations, Minecraft.getSystemTime() / 1000.0D, 0.0D, 0.0D);
         }
         return model;
     }

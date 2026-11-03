@@ -18,8 +18,25 @@ public final class ModelAnimator {
     private ModelAnimator() {
     }
 
-    public static void apply(JemModel model, JemAnimation animation, double seconds) {
-        double time = animation.time(seconds);
+    public static void apply(JemModel model, List<ModelRegistry.AnimationLayer> layers, double seconds,
+                             double limbSwing, double limbSpeed) {
+        for (ModelRegistry.AnimationLayer layer : layers) {
+            JemAnimation animation = ModelRegistry.getAnimation(layer);
+            if (animation == null) {
+                continue;
+            }
+            double weight = layer.limbSpeedWeighted ? Math.max(0.0D, Math.min(1.0D, limbSpeed)) : 1.0D;
+            if (weight <= 0.0D) {
+                continue;
+            }
+            double driver = layer.limbSwingDriven ? limbSwing : seconds;
+            double cycle = layer.cycle > 0.0D ? layer.cycle : animation.length();
+            double scaled = cycle > 0.0D ? driver / cycle * animation.length() : driver;
+            apply(model, animation, animation.time(scaled), weight);
+        }
+    }
+
+    private static void apply(JemModel model, JemAnimation animation, double time, double weight) {
         int matched = 0;
         List<String> missing = new ArrayList<>();
 
@@ -33,23 +50,23 @@ public final class ModelAnimator {
 
             double[] rotation = animation.sampleRotation(bone, time);
             if (rotation != null) {
-                part.animRotateX = (float) Math.toRadians(SIGN_X * rotation[0]);
-                part.animRotateY = (float) Math.toRadians(SIGN_Y * rotation[1]);
-                part.animRotateZ = (float) Math.toRadians(SIGN_Z * rotation[2]);
+                part.animRotateX += (float) (Math.toRadians(SIGN_X * rotation[0]) * weight);
+                part.animRotateY += (float) (Math.toRadians(SIGN_Y * rotation[1]) * weight);
+                part.animRotateZ += (float) (Math.toRadians(SIGN_Z * rotation[2]) * weight);
             }
 
             double[] position = animation.samplePosition(bone, time);
             if (position != null) {
-                part.animTranslateX = (float) (SIGN_X * position[0]);
-                part.animTranslateY = (float) (SIGN_Y * position[1]);
-                part.animTranslateZ = (float) (SIGN_Z * position[2]);
+                part.animTranslateX += (float) (SIGN_X * position[0] * weight);
+                part.animTranslateY += (float) (SIGN_Y * position[1] * weight);
+                part.animTranslateZ += (float) (SIGN_Z * position[2] * weight);
             }
 
             double[] scale = animation.sampleScale(bone, time);
             if (scale != null) {
-                part.animScaleX = (float) scale[0];
-                part.animScaleY = (float) scale[1];
-                part.animScaleZ = (float) scale[2];
+                part.animScaleX *= (float) (1.0D + (scale[0] - 1.0D) * weight);
+                part.animScaleY *= (float) (1.0D + (scale[1] - 1.0D) * weight);
+                part.animScaleZ *= (float) (1.0D + (scale[2] - 1.0D) * weight);
             }
 
             Boolean visible = animation.sampleVisible(bone, time);

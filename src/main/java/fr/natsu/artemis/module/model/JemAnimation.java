@@ -58,7 +58,11 @@ public final class JemAnimation {
         if (this.length <= 0.0D) {
             return 0.0D;
         }
-        return this.loop ? seconds % this.length : Math.min(seconds, this.length);
+        if (!this.loop) {
+            return Math.max(0.0D, Math.min(seconds, this.length));
+        }
+        double time = seconds % this.length;
+        return time < 0.0D ? time + this.length : time;
     }
 
     public double[] sampleRotation(String bone, double time) {

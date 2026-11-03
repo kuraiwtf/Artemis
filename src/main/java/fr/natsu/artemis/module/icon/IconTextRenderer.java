@@ -58,6 +58,8 @@ public final class IconTextRenderer {
             color |= 0xFF000000;
         }
         int alpha = (color >>> 24) & 0xFF;
+        x = Math.round(x);
+        y = Math.round(y);
 
         List<Part> parts = split(text);
         StringBuilder seen = new StringBuilder();
@@ -68,7 +70,7 @@ public final class IconTextRenderer {
                 if (!shadowPass) {
                     drawIcon(part.icon, cursor, y, alpha);
                 }
-                cursor += part.icon.width;
+                cursor = Math.round(cursor + part.icon.width);
                 continue;
             }
             String segment = seen.length() == 0 ? part.text
@@ -86,7 +88,7 @@ public final class IconTextRenderer {
 
         for (Part part : parts) {
             if (part.icon != null) {
-                total += part.icon.width;
+                total = Math.round(total + part.icon.width);
                 continue;
             }
             String segment = seen.length() == 0 ? part.text

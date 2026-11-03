@@ -38,6 +38,23 @@ public final class ModelRegistry {
 
     private static boolean loadAttempted;
 
+    public static final class AnimationLayer {
+        public final String path;
+        public final String name;
+        public final boolean limbSwingDriven;
+        public final double cycle;
+        public final boolean limbSpeedWeighted;
+
+        AnimationLayer(String path, String name, boolean limbSwingDriven, double cycle,
+                       boolean limbSpeedWeighted) {
+            this.path = path;
+            this.name = name;
+            this.limbSwingDriven = limbSwingDriven;
+            this.cycle = cycle;
+            this.limbSpeedWeighted = limbSpeedWeighted;
+        }
+    }
+
     public static final class Entry {
         public final String modelPath;
         public final String entityId;
@@ -45,19 +62,17 @@ public final class ModelRegistry {
         public final float scale;
         public final boolean ignoreCull;
         public final float renderDistance;
-        public final String animationPath;
-        public final String animationName;
+        public final List<AnimationLayer> animations;
 
         Entry(String modelPath, String entityId, NameMatcher name, float scale,
-              boolean ignoreCull, float renderDistance, String animationPath, String animationName) {
+              boolean ignoreCull, float renderDistance, List<AnimationLayer> animations) {
             this.modelPath = modelPath;
             this.entityId = entityId;
             this.name = name;
             this.scale = scale;
             this.ignoreCull = ignoreCull;
             this.renderDistance = renderDistance;
-            this.animationPath = animationPath;
-            this.animationName = animationName;
+            this.animations = animations;
         }
     }
 
@@ -68,19 +83,17 @@ public final class ModelRegistry {
         public final float scale;
         public final float[] offset;
         public final String attach;
-        public final String animationPath;
-        public final String animationName;
+        public final List<AnimationLayer> animations;
 
         ItemEntry(String modelPath, String itemId, NameMatcher name, float scale, float[] offset,
-                  String attach, String animationPath, String animationName) {
+                  String attach, List<AnimationLayer> animations) {
             this.modelPath = modelPath;
             this.itemId = itemId;
             this.name = name;
             this.scale = scale;
             this.offset = offset;
             this.attach = attach;
-            this.animationPath = animationPath;
-            this.animationName = animationName;
+            this.animations = animations;
         }
     }
 
@@ -218,16 +231,13 @@ public final class ModelRegistry {
         JsonElement scale = object.get("scale");
         JsonElement ignoreCull = object.get("ignoreCull");
         JsonElement renderDistance = object.get("renderDistance");
-        JsonElement animation = object.get("animation");
-        JsonElement animationName = object.get("animationName");
         return new Entry(model.getAsString(),
             entity == null ? null : entity.getAsString(),
             name == null ? null : NameMatcher.compile(name.getAsString()),
             scale == null ? 1.0F : scale.getAsFloat(),
             ignoreCull != null && ignoreCull.getAsBoolean(),
             renderDistance == null ? 0.0F : renderDistance.getAsFloat(),
-            animation == null ? null : animation.getAsString(),
-            animationName == null ? null : animationName.getAsString());
+            parseLayers(object));
     }
 
     private static ItemEntry parseItemEntry(JsonObject object) {
@@ -239,8 +249,6 @@ public final class ModelRegistry {
         JsonElement name = object.get("name");
         JsonElement scale = object.get("scale");
         JsonElement attach = object.get("attach");
-        JsonElement animation = object.get("animation");
-        JsonElement animationName = object.get("animationName");
 
         float[] offset = new float[3];
         JsonElement offsetElement = object.get("offset");
@@ -258,8 +266,40 @@ public final class ModelRegistry {
             scale == null ? 1.0F : scale.getAsFloat(),
             offset,
             attach == null ? null : attach.getAsString(),
-            animation == null ? null : animation.getAsString(),
-            animationName == null ? null : animationName.getAsString());
+            parseLayers(object));
+    }
+
+    private static List<AnimationLayer> parseLayers(JsonObject object) {
+        List<AnimationLayer> layers = new ArrayList<>();
+        JsonElement array = object.get("animations");
+        if (array != null && array.isJsonArray()) {
+            for (JsonElement element : array.getAsJsonArray()) {
+                if (!element.isJsonObject()) {
+                    continue;
+                }
+                JsonObject layer = element.getAsJsonObject();
+                JsonElement file = layer.get("file");
+                JsonElement name = layer.get("name");
+                if (file == null || name == null) {
+                    continue;
+                }
+                JsonElement driver = layer.get("driver");
+                JsonElement cycle = layer.get("cycle");
+                JsonElement weight = layer.get("weight");
+                layers.add(new AnimationLayer(file.getAsString(), name.getAsString(),
+                    driver != null && "limb_swing".equals(driver.getAsString()),
+                    cycle == null ? 0.0D : cycle.getAsDouble(),
+                    weight != null && "limb_speed".equals(weight.getAsString())));
+            }
+            return layers;
+        }
+        JsonElement animation = object.get("animation");
+        JsonElement animationName = object.get("animationName");
+        if (animation != null && animationName != null) {
+            layers.add(new AnimationLayer(animation.getAsString(), animationName.getAsString(),
+                false, 0.0D, false));
+        }
+        return layers;
     }
 
     private static BossBarEntry parseBossBarEntry(JsonObject object) {
@@ -393,8 +433,8 @@ public final class ModelRegistry {
         return model;
     }
 
-    public static JemAnimation getAnimation(Entry entry) {
-        return getAnimation(entry.animationPath, entry.animationName);
+    public static JemAnimation getAnimation(AnimationLayer layer) {
+        return getAnimation(layer.path, layer.name);
     }
 
     public static JemAnimation getAnimation(String animationPath, String wantedName) {

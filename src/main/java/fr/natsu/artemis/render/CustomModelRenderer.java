@@ -1,6 +1,5 @@
 package fr.natsu.artemis.render;
 
-import fr.natsu.artemis.module.model.JemAnimation;
 import fr.natsu.artemis.module.model.JemModel;
 import fr.natsu.artemis.module.model.ModelAnimator;
 import fr.natsu.artemis.module.model.ModelRegistry;
@@ -148,9 +147,15 @@ public final class CustomModelRenderer {
         RENDERED_FRAME.add(entity);
 
         model.resetAnimation();
-        JemAnimation animation = ModelRegistry.getAnimation(entry);
-        if (animation != null) {
-            ModelAnimator.apply(model, animation, (entity.ticksExisted + partialTicks) / 20.0D);
+        if (!entry.animations.isEmpty()) {
+            float limbSpeed = entity.prevLimbSwingAmount
+                + (entity.limbSwingAmount - entity.prevLimbSwingAmount) * partialTicks;
+            float limbSwing = entity.limbSwing - entity.limbSwingAmount * (1.0F - partialTicks);
+            if (entity.isChild()) {
+                limbSwing *= 3.0F;
+            }
+            ModelAnimator.apply(model, entry.animations, (entity.ticksExisted + partialTicks) / 20.0D,
+                limbSwing, limbSpeed);
         }
         render(entity, model, entry.scale, event.x, event.y, event.z);
     }

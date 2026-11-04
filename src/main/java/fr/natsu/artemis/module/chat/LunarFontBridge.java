@@ -1,5 +1,6 @@
 package fr.natsu.artemis.module.chat;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import net.minecraft.client.gui.FontRenderer;
@@ -8,6 +9,7 @@ public final class LunarFontBridge {
 
     private static Method getHolder;
     private static Method setHolder;
+    private static Field shadowFlag;
     private static boolean resolved;
 
     private LunarFontBridge() {
@@ -25,6 +27,12 @@ public final class LunarFontBridge {
                 setHolder = method;
             }
         }
+        for (Field field : FontRenderer.class.getDeclaredFields()) {
+            if (field.getName().equals("lunar$shadow") && field.getType() == boolean.class) {
+                field.setAccessible(true);
+                shadowFlag = field;
+            }
+        }
     }
 
     public static Object current(FontRenderer font) {
@@ -39,7 +47,7 @@ public final class LunarFontBridge {
         }
     }
 
-    public static int alphaOf(Object holder, float x, float y, int fallback) {
+    public static int colorOf(Object holder, float x, float y, int fallback) {
         if (holder == null) {
             return fallback;
         }
@@ -47,9 +55,21 @@ public final class LunarFontBridge {
             Method apply = holder.getClass().getMethod("apply", Object.class);
             apply.setAccessible(true);
             Object value = apply.invoke(holder, Float.valueOf(x + y));
-            return value instanceof Integer ? ((Integer) value) >>> 24 : fallback;
+            return value instanceof Integer ? (Integer) value : fallback;
         } catch (Throwable t) {
             return fallback;
+        }
+    }
+
+    public static boolean isShadowPass(FontRenderer font) {
+        resolve();
+        if (shadowFlag == null) {
+            return false;
+        }
+        try {
+            return shadowFlag.getBoolean(font);
+        } catch (Throwable t) {
+            return false;
         }
     }
 

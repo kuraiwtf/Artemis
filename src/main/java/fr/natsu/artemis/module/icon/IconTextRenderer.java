@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import fr.natsu.artemis.module.chat.HexTextRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -51,9 +52,6 @@ public final class IconTextRenderer {
 
     public static int draw(FontRenderer font, String text, float x, float y, int color, boolean shadow,
                            boolean shadowPass) {
-        if (shadowPass) {
-            color = (color & 0xFCFCFC) >> 2 | color & 0xFF000000;
-        }
         if ((color & 0xFC000000) == 0) {
             color |= 0xFF000000;
         }
@@ -75,7 +73,7 @@ public final class IconTextRenderer {
             }
             String segment = seen.length() == 0 ? part.text
                 : FontRenderer.getFormatFromString(seen.toString()) + part.text;
-            cursor = font.drawString(segment, cursor, y, color, shadow);
+            cursor = HexTextRenderer.draw(font, segment, cursor, y, color, shadow, shadowPass);
             seen.append(part.text);
         }
         return (int) cursor;

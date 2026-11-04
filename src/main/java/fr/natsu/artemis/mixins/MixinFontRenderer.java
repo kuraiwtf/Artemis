@@ -30,18 +30,20 @@ public class MixinFontRenderer {
         }
         Object holder = LunarFontBridge.current(self);
         int drawColor = color;
+        boolean shadow = shadowPass;
         if (holder != null) {
-            int alpha = LunarFontBridge.alphaOf(holder, x, y, (color >>> 24) & 0xFF);
-            if (alpha < 4) {
+            int holderColor = LunarFontBridge.colorOf(holder, x, y, color);
+            if (((holderColor >>> 24) & 0xFF) < 4) {
                 return;
             }
-            drawColor = (alpha << 24) | (color & 0xFFFFFF);
+            drawColor = holderColor;
+            shadow = shadow || LunarFontBridge.isShadowPass(self);
             LunarFontBridge.suspend(self);
         }
         try {
             cir.setReturnValue(icons
-                ? IconTextRenderer.draw(self, text, x, y, drawColor, false, shadowPass)
-                : HexTextRenderer.draw(self, text, x, y, drawColor, false, shadowPass));
+                ? IconTextRenderer.draw(self, text, x, y, drawColor, false, shadow)
+                : HexTextRenderer.draw(self, text, x, y, drawColor, false, shadow));
         } finally {
             LunarFontBridge.restore(self, holder);
         }

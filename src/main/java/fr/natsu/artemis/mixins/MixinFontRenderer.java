@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import fr.natsu.artemis.module.chat.HexTextRenderer;
 import fr.natsu.artemis.module.chat.LunarFontBridge;
+import fr.natsu.artemis.module.chat.TitleDiagnostic;
 import fr.natsu.artemis.module.icon.IconTextRenderer;
 import net.minecraft.client.gui.FontRenderer;
 
@@ -14,6 +15,11 @@ import net.minecraft.client.gui.FontRenderer;
 public class MixinFontRenderer {
 
     private static final char SECTION = '§';
+
+    @Inject(method = "renderDefaultChar", at = @At("HEAD"), require = 0)
+    private void artemis$titleDiagChar(int index, boolean italic, CallbackInfoReturnable<Float> cir) {
+        TitleDiagnostic.onChar((FontRenderer) (Object) this);
+    }
 
     @Inject(
         method = "renderString(Ljava/lang/String;FFIZ)I",

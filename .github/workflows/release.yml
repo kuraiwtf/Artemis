@@ -39,10 +39,8 @@ jobs:
           short=$(git rev-parse --short HEAD)
           tag="v${version}-build.${GITHUB_RUN_NUMBER}"
 
-          # One jar per release, always under the same name, so that
-          # /releases/latest/download/artemis-<mc>.jar (linked from the README) always works.
-          # The version is in the release tag and title.
-          asset="artemis-${mc}.jar"
+          # One jar per release: artemis-<minecraft>-<mod version>.jar
+          asset="artemis-${mc}-${version}.jar"
           cp "build/libs/artemis-${version}.jar" "$asset"
 
           {

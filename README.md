@@ -46,7 +46,7 @@ Here is a list of currently supported modules :
 
 ## Download 
 
-**[Download the latest build (Forge 1.8.9)](https://github.com/kuraiwtf/Artemis/releases/latest/download/artemis-1.8.9.jar)**
+**[Download the latest build (Forge 1.8.9)](https://github.com/kuraiwtf/Artemis/releases/latest)**, the jar is attached to the release (`artemis-1.8.9-<version>.jar`).
 
 Every push to `main` is built and published automatically on the [releases page](https://github.com/kuraiwtf/Artemis/releases), which also keeps every previous build. Builds from other branches are marked as pre-releases.
 

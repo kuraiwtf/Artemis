@@ -75,7 +75,7 @@ public final class Artemis {
 
     public static final String MOD_ID = "artemis";
     public static final String MOD_NAME = "Artemis";
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.2.0";
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 

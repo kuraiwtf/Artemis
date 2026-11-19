@@ -1,0 +1,54 @@
+name: Build and release
+
+# Every push to main builds the mod and publishes it as a new GitHub release.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Forge 1.8.9 / ForgeGradle 2.1 only builds on JDK 8.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: gradle
+
+      - name: Build
+        run: sh ./gradlew build --no-daemon
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep '^mod_version=' gradle.properties | cut -d= -f2)
+          mc=$(grep '^minecraft_version=' gradle.properties | cut -d= -f2)
+          short=$(git rev-parse --short HEAD)
+          tag="v${version}-build.${GITHUB_RUN_NUMBER}"
+
+          asset="artemis-${mc}-${version}+build.${GITHUB_RUN_NUMBER}.jar"
+          cp "build/libs/artemis-${version}.jar" "$asset"
+
+          {
+            echo "Automatic build of \`${short}\` (${mc}, Forge)."
+            echo
+            git log -1 --format=%B "$GITHUB_SHA" | grep -v '^Co-Authored-By:'
+          } > notes.md
+
+          gh release create "$tag" "$asset" \
+            --target "$GITHUB_SHA" \
+            --title "Artemis ${version} (build ${GITHUB_RUN_NUMBER})" \
+            --notes-file notes.md \
+            --latest

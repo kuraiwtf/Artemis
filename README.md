@@ -21,7 +21,7 @@ This mod is "barebones", meaning there is no way to manually create a Lunar wayp
 **Artemis** registers Lunar Client's channels when connecting to a server, so the **official Apollo plugin** can fully interact with the client.
 
 Here is a list of currently supported modules : 
-- Chat -> Chat supports live messages. [Chat Module](https://lunarclient.dev/apollo/developers/modules/chat)
+- Chat -> Supports live messages, chat buttons, chat tabs (with patterns and input prefixes) and chat popups. [Chat Module](https://lunarclient.dev/apollo/developers/modules/chat)
 - Glowing -> Supports RGB Glowing for specific players / entities. [Glow Module](https://lunarclient.dev/apollo/developers/modules/glow)
 - TeamView -> Supports RGB TeamView targets. [TeamView Module](https://lunarclient.dev/apollo/developers/modules/team)
 - Waypoint -> Supports the creation, deletion or edition of Waypoints. [Waypoint Module](https://lunarclient.dev/apollo/developers/modules/waypoint)
@@ -29,10 +29,19 @@ Here is a list of currently supported modules :
 - Colored Fire -> Supports RGB colors for fire display. [Colored Fire Module](https://lunarclient.dev/apollo/developers/modules/coloredfire)
 - Cooldown -> Supports custom Cooldown displays. [Cooldown Module](https://lunarclient.dev/apollo/developers/modules/cooldown)
 - Glint -> Supports RGB colors for enchantments via NBT. [Glint Module](https://lunarclient.dev/apollo/developers/modules/glint)
-- Inventory -> Supports specific item displays in inventories. [Inventory Module](https://lunarclient.dev/apollo/developers/modules/inventory)
+- Inventory -> Supports specific item displays in inventories, and buttons beside the player inventory. [Inventory Module](https://lunarclient.dev/apollo/developers/modules/inventory)
 - Limb -> Supports partial limb rendering. [Limb Module](https://lunarclient.dev/apollo/developers/modules/limb)
 - NameTag -> Supports custom NameTag options. [NameTag Module](https://lunarclient.dev/apollo/developers/modules/nametag)
 - Vignette -> Supports custom Vignettes. [Vignette Module](https://lunarclient.dev/apollo/developers/modules/vignette)
+- Title -> Supports custom titles and subtitles with scale, scale interpolation and fade timings. [Title Module](https://lunarclient.dev/apollo/developers/modules/title)
+- Stopwatch -> Supports server-controlled stopwatches and timers on the HUD. [Stopwatch Module](https://lunarclient.dev/apollo/developers/modules/stopwatch)
+- TNT Countdown -> Shows the time left above primed TNT, synced with the server's custom fuses. [TNT Countdown Module](https://lunarclient.dev/apollo/developers/modules/tntcountdown)
+- Entity -> Supports rainbow sheep and upside-down entities. [Entity Module](https://lunarclient.dev/apollo/developers/modules/entity)
+- Height Limit -> Shows the build height limit of the current world. [Height Limit Module](https://lunarclient.dev/apollo/developers/modules/heightlimit)
+- Nick Hider -> Shows a server-given nickname in place of your username. [Nick Hider Module](https://lunarclient.dev/apollo/developers/modules/nickhider)
+- Server Rule -> Supports competitive game confirmations, anti portal traps and the nametag render distance. [Server Rule Module](https://lunarclient.dev/apollo/developers/modules/serverrule)
+- Server Link -> Adds a "Server Links" button to the pause menu. [Server Link Module](https://lunarclient.dev/apollo/developers/modules/serverlink)
+- Ping Marker -> Ping the spot you look at (Z by default) and see your team's pings.
 
 ## Download 
 

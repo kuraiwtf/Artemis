@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.CodedOutputStream;
 
 import fr.natsu.artemis.Artemis;
 import fr.natsu.artemis.LunarHost;
@@ -29,6 +31,8 @@ public final class ApolloNetwork {
     private final Map<String, ApolloPacketHandler> handlers = new ConcurrentHashMap<>();
     private final java.util.Set<String> passedToLunar = java.util.Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
+    private final java.util.List<Runnable> disconnectHooks = new java.util.concurrent.CopyOnWriteArrayList<>();
+
     private boolean logAllIncoming = true;
 
     private ApolloNetwork() {
@@ -43,6 +47,11 @@ public final class ApolloNetwork {
         Artemis.LOGGER.info("[Apollo] handler registered for {}", messageType);
     }
 
+    /** Runs on disconnect, on the network thread: per-server module state is dropped here. */
+    public void onDisconnect(Runnable hook) {
+        this.disconnectHooks.add(hook);
+    }
+
     public void setLogAllIncoming(boolean logAllIncoming) {
         this.logAllIncoming = logAllIncoming;
     }
@@ -50,11 +59,65 @@ public final class ApolloNetwork {
     @SubscribeEvent
     public void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
         this.sendChannelRegistration(event.manager);
+        if (!LunarHost.isLunar()) {
+            this.sendHandshake(event.manager);
+        }
     }
 
     @SubscribeEvent
     public void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         Artemis.LOGGER.info("[Apollo] disconnected from the server");
+        for (Runnable hook : this.disconnectHooks) {
+            try {
+                hook.run();
+            } catch (Throwable e) {
+                Artemis.LOGGER.error("[Apollo] error while resetting module state", e);
+            }
+        }
+    }
+
+    /**
+     * {@code player.v1.PlayerHandshakeMessage}, which Lunar Client sends right after registering its
+     * channels. Only the Minecraft version is filled in ({@code minecraft_version} #1 →
+     * {@code MinecraftVersion.enum} #1): Artemis does not claim a Lunar Client build and does not
+     * report the installed mods.
+     */
+    private void sendHandshake(NetworkManager manager) {
+        if (manager == null) {
+            return;
+        }
+        try {
+            ByteString version = encode(out -> out.writeString(1, "v1_8"));
+            ByteString handshake = encode(out -> out.writeBytes(1, version));
+            this.send(manager, "lunarclient.apollo.player.v1.PlayerHandshakeMessage", handshake);
+            Artemis.LOGGER.info("[Apollo] handshake sent (v1_8)");
+        } catch (Exception e) {
+            Artemis.LOGGER.warn("[Apollo] could not send the handshake: {}", e.toString());
+        }
+    }
+
+    @FunctionalInterface
+    public interface ProtoWriter {
+        void write(CodedOutputStream out) throws java.io.IOException;
+    }
+
+    public static ByteString encode(ProtoWriter writer) throws java.io.IOException {
+        ByteString.Output bytes = ByteString.newOutput();
+        CodedOutputStream out = CodedOutputStream.newInstance(bytes);
+        writer.write(out);
+        out.flush();
+        return bytes.toByteString();
+    }
+
+    /** Wraps {@code value} in a {@code google.protobuf.Any} and sends it on {@code lunar:apollo}. */
+    public void send(NetworkManager manager, String messageType, ByteString value) {
+        byte[] payload = Any.newBuilder()
+            .setTypeUrl(ApolloProtocol.TYPE_URL_PREFIX + messageType)
+            .setValue(value)
+            .build()
+            .toByteArray();
+        PacketBuffer buffer = new PacketBuffer(Unpooled.wrappedBuffer(payload));
+        manager.sendPacket(new C17PacketCustomPayload(ApolloProtocol.CHANNEL, buffer));
     }
 
     private void sendChannelRegistration(NetworkManager manager) {
@@ -116,7 +179,7 @@ public final class ApolloNetwork {
 
         try {
             handler.handle(any);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Artemis.LOGGER.error("[Apollo] error in the handler for {}", type, e);
         }
     }

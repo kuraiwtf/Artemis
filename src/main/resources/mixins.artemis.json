@@ -19,7 +19,10 @@
     "MixinGuiScreen",
     "MixinFontRenderer",
     "MixinFontRendererLunar",
-    "MixinS3EPacketTeams"
+    "MixinS3EPacketTeams",
+    "MixinLayerSheepWool",
+    "MixinEntityPlayerSP",
+    "MixinGuiNewChat"
   ],
   "mixins": [
     "MixinEntity"

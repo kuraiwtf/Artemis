@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import fr.natsu.artemis.gui.ContainerBounds;
 import fr.natsu.artemis.module.inventory.InventoryInteraction;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,7 +21,39 @@ import net.minecraft.inventory.Slot;
  * cancels the click (action fired / unclickable) and hides the slot highlight when asked.
  */
 @Mixin(GuiContainer.class)
-public abstract class MixinGuiContainer {
+public abstract class MixinGuiContainer implements ContainerBounds {
+
+    @Shadow
+    protected int guiLeft;
+
+    @Shadow
+    protected int guiTop;
+
+    @Shadow
+    protected int xSize;
+
+    @Shadow
+    protected int ySize;
+
+    @Override
+    public int artemis$left() {
+        return this.guiLeft;
+    }
+
+    @Override
+    public int artemis$top() {
+        return this.guiTop;
+    }
+
+    @Override
+    public int artemis$width() {
+        return this.xSize;
+    }
+
+    @Override
+    public int artemis$height() {
+        return this.ySize;
+    }
 
     @Shadow
     private Slot theSlot;

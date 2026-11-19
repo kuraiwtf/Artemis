@@ -216,7 +216,7 @@ public final class MarkerRenderer {
         return 0xFF000000 | (argb & 0xFFFFFF);
     }
 
-    private static double[] project(double x, double y, double z, ScaledResolution resolution) {
+    static double[] project(double x, double y, double z, ScaledResolution resolution) {
         FloatBuffer modelView = BufferUtils.createFloatBuffer(16);
         FloatBuffer projection = BufferUtils.createFloatBuffer(16);
         IntBuffer viewport = BufferUtils.createIntBuffer(16);
@@ -239,7 +239,7 @@ public final class MarkerRenderer {
         return new double[] {screenX, screenY};
     }
 
-    private static void setupOverlay(ScaledResolution resolution) {
+    static void setupOverlay(ScaledResolution resolution) {
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPushMatrix();
         GL11.glLoadIdentity();
@@ -252,7 +252,7 @@ public final class MarkerRenderer {
         GlStateManager.disableLighting();
     }
 
-    private static void cleanupOverlay() {
+    static void cleanupOverlay() {
         GlStateManager.enableDepth();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 

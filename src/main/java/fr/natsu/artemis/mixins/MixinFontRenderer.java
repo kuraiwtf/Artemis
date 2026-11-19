@@ -3,12 +3,14 @@ package fr.natsu.artemis.mixins;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import fr.natsu.artemis.module.chat.HexTextRenderer;
 import fr.natsu.artemis.module.chat.LunarFontBridge;
 import fr.natsu.artemis.module.chat.TitleDiagnostic;
 import fr.natsu.artemis.module.icon.IconTextRenderer;
+import fr.natsu.artemis.module.nickhider.NickHiderModule;
 import net.minecraft.client.gui.FontRenderer;
 
 @Mixin(FontRenderer.class)
@@ -19,6 +21,19 @@ public class MixinFontRenderer {
     @Inject(method = "renderDefaultChar", at = @At("HEAD"), require = 0)
     private void artemis$titleDiagChar(int index, boolean italic, CallbackInfoReturnable<Float> cir) {
         TitleDiagnostic.onChar((FontRenderer) (Object) this);
+    }
+
+    // Mixin 0.7 applies same-point injectors in declaration order: these must stay above the HEAD
+    // injections below so that the hex/icon paths already see the nick-swapped text.
+    @ModifyVariable(method = "renderString(Ljava/lang/String;FFIZ)I", at = @At("HEAD"), argsOnly = true,
+        ordinal = 0, require = 0)
+    private String artemis$nickRender(String text) {
+        return NickHiderModule.apply(text);
+    }
+
+    @ModifyVariable(method = "getStringWidth", at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 0)
+    private String artemis$nickWidth(String text) {
+        return NickHiderModule.apply(text);
     }
 
     @Inject(

@@ -98,7 +98,7 @@ public final class NametagModule {
         Artemis.LOGGER.info("[Nametag] reset all");
     }
 
-    private static void parseComponent(ByteString data, int inheritedRgb, String inheritedCodes,
+    public static void parseComponent(ByteString data, int inheritedRgb, String inheritedCodes,
                                        List<AdventureText.Run> out) throws Exception {
         CodedInputStream in = data.newCodedInput();
         String content = "";

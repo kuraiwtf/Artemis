@@ -57,7 +57,7 @@ public final class ArtemisChat {
         }
     }
 
-    private static void display(int id, String adventureJson) {
+    static void display(int id, String adventureJson) {
         String encoded = encode(AdventureText.parse(adventureJson));
         ACTIVE_IDS.add(id);
         Minecraft mc = Minecraft.getMinecraft();
@@ -69,7 +69,7 @@ public final class ArtemisChat {
         });
     }
 
-    private static void remove(int id) {
+    static void remove(int id) {
         ACTIVE_IDS.remove(id);
         Minecraft mc = Minecraft.getMinecraft();
         mc.addScheduledTask(() -> mc.ingameGUI.getChatGUI().deleteChatLine(id));

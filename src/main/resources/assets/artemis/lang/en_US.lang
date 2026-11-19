@@ -18,3 +18,5 @@ artemis.list.remove=Remove
 artemis.list.waypoint=Waypoint
 artemis.list.marker=Marker
 artemis.list.hidden=(hidden)
+artemis.key.ping=Ping location
+artemis.key.category=Artemis

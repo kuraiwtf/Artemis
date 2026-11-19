@@ -39,8 +39,8 @@ jobs:
           short=$(git rev-parse --short HEAD)
           tag="v${version}-build.${GITHUB_RUN_NUMBER}"
 
-          # One jar per release: artemis-<minecraft>-<mod version>.jar
-          asset="artemis-${mc}-${version}.jar"
+          # One jar per release: artemis-<minecraft>-<mod version>+build.<run number>.jar
+          asset="artemis-${mc}-${version}+build.${GITHUB_RUN_NUMBER}.jar"
           cp "build/libs/artemis-${version}.jar" "$asset"
 
           {

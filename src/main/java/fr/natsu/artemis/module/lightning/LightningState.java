@@ -32,6 +32,10 @@ public final class LightningState {
         return BOLTS;
     }
 
+    public static void clear() {
+        BOLTS.clear();
+    }
+
     public static boolean isEmpty() {
         return BOLTS.isEmpty();
     }

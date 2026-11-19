@@ -66,7 +66,16 @@ public final class ApolloNetwork {
 
     @SubscribeEvent
     public void onDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
-        Artemis.LOGGER.info("[Apollo] disconnected from the server");
+        this.resetSession("disconnected from the server");
+    }
+
+    /**
+     * Drops everything servers sent through Apollo. Runs on disconnect, and on every
+     * {@code S01PacketJoinGame}: behind a proxy (BungeeCord, Velocity) a server switch is only a new
+     * join-game packet, never a disconnect, and the new server's Apollo messages come after it.
+     */
+    public void resetSession(String reason) {
+        Artemis.LOGGER.info("[Apollo] {}: clearing the Apollo state", reason);
         for (Runnable hook : this.disconnectHooks) {
             try {
                 hook.run();

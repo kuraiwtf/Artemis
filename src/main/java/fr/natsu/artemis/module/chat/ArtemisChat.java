@@ -75,7 +75,8 @@ public final class ArtemisChat {
         mc.addScheduledTask(() -> mc.ingameGUI.getChatGUI().deleteChatLine(id));
     }
 
-    private static void clear() {
+    /** Removes every chat line Artemis added (Apollo live messages and {@code artemis:chat} lines). */
+    public static void clear() {
         Minecraft mc = Minecraft.getMinecraft();
         Integer[] ids = ACTIVE_IDS.toArray(new Integer[0]);
         ACTIVE_IDS.clear();

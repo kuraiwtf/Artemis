@@ -51,6 +51,11 @@ public final class LimbState {
         });
     }
 
+    public static void resetAll() {
+        HIDDEN.clear();
+        HIDDEN_ARMOR.clear();
+    }
+
     public static boolean isEmpty() {
         return HIDDEN.isEmpty();
     }

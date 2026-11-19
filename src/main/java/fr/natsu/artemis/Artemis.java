@@ -100,6 +100,12 @@ public final class Artemis {
         safe("MinecraftForge.EVENT_BUS.register(new CustomModelRenderer())", () -> MinecraftForge.EVENT_BUS.register(new CustomModelRenderer()));
         safe("MinecraftForge.EVENT_BUS.register(new BossBarRenderer())", () -> MinecraftForge.EVENT_BUS.register(new BossBarRenderer()));
         safe("MinecraftForge.EVENT_BUS.register(new LightningRenderer())", () -> MinecraftForge.EVENT_BUS.register(new LightningRenderer()));
+        // Everything a server sent is dropped when leaving it (disconnect, or a proxy server switch).
+        network.onDisconnect(fr.natsu.artemis.module.glow.GlowState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.vignette.VignetteState::reset);
+        network.onDisconnect(fr.natsu.artemis.module.lightning.LightningState::clear);
+        network.onDisconnect(fr.natsu.artemis.module.chat.ArtemisChat::clear);
+
         if (lunar) {
             LOGGER.info("[Artemis] init - Lunar profile: Glow/Vignette/Chat/Lightning/Model/Icon/BossBar modules active");
             return;
@@ -125,6 +131,18 @@ public final class Artemis {
         safe("MinecraftForge.EVENT_BUS.register(new HologramRenderer())", () -> MinecraftForge.EVENT_BUS.register(new HologramRenderer()));
         safe("ColoredFireModule.register(network)", () -> ColoredFireModule.register(network));
         safe("LimbModule.register(network)", () -> LimbModule.register(network));
+
+        network.onDisconnect(fr.natsu.artemis.module.nametag.NametagState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.cooldown.CooldownState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.team.TeamState::reset);
+        network.onDisconnect(fr.natsu.artemis.module.waypoint.WaypointState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.marker.MarkerState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.beam.BeamState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.notification.NotificationState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.border.BorderState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.hologram.HologramState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.coloredfire.ColoredFireState::resetAll);
+        network.onDisconnect(fr.natsu.artemis.module.limb.LimbState::resetAll);
         safe("ConfigurableModule.register(network)", () -> ConfigurableModule.register(network));
         safe("PlayerWorld.register(network)", () -> PlayerWorld.register(network));
         safe("MinecraftForge.EVENT_BUS.register(new ServerRules())", () -> MinecraftForge.EVENT_BUS.register(new ServerRules()));

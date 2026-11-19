@@ -13,6 +13,7 @@ import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.S01PacketJoinGame;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 
 /**
@@ -24,6 +25,12 @@ public class MixinNetworkManager {
 
     @Inject(method = "channelRead0", at = @At("HEAD"), cancellable = true)
     private void artemis$onReceive(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
+        if (packet instanceof S01PacketJoinGame) {
+            // Joining a world: first join, or a proxy server switch. Same thread as the Apollo
+            // messages below, so the reset is ordered before whatever the new server sends.
+            ApolloNetwork.getInstance().resetSession("joined a server");
+            return;
+        }
         if (!(packet instanceof S3FPacketCustomPayload)) {
             return;
         }

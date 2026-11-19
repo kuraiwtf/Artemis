@@ -1,9 +1,10 @@
 name: Build and release
 
-# Every push to main builds the mod and publishes it as a new GitHub release.
+# Every push, on any branch, builds the mod and publishes it as a new GitHub release.
+# Releases from main are marked "latest"; releases from other branches are pre-releases.
 on:
   push:
-    branches: [main]
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
@@ -42,13 +43,21 @@ jobs:
           cp "build/libs/artemis-${version}.jar" "$asset"
 
           {
-            echo "Automatic build of \`${short}\` (${mc}, Forge)."
+            echo "Automatic build of \`${short}\` on \`${GITHUB_REF_NAME}\` (${mc}, Forge)."
             echo
             git log -1 --format=%B "$GITHUB_SHA" | grep -v '^Co-Authored-By:'
           } > notes.md
 
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            channel="--latest"
+            title="Artemis ${version} (build ${GITHUB_RUN_NUMBER})"
+          else
+            channel="--prerelease"
+            title="Artemis ${version} (build ${GITHUB_RUN_NUMBER}, ${GITHUB_REF_NAME})"
+          fi
+
           gh release create "$tag" "$asset" \
             --target "$GITHUB_SHA" \
-            --title "Artemis ${version} (build ${GITHUB_RUN_NUMBER})" \
+            --title "$title" \
             --notes-file notes.md \
-            --latest
+            $channel

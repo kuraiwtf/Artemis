@@ -39,11 +39,11 @@ jobs:
           short=$(git rev-parse --short HEAD)
           tag="v${version}-build.${GITHUB_RUN_NUMBER}"
 
-          asset="artemis-${mc}-${version}+build.${GITHUB_RUN_NUMBER}.jar"
+          # One jar per release, always under the same name, so that
+          # /releases/latest/download/artemis-<mc>.jar (linked from the README) always works.
+          # The version is in the release tag and title.
+          asset="artemis-${mc}.jar"
           cp "build/libs/artemis-${version}.jar" "$asset"
-          # Same jar under a fixed name, so /releases/latest/download/artemis-<mc>.jar always works.
-          stable="artemis-${mc}.jar"
-          cp "build/libs/artemis-${version}.jar" "$stable"
 
           {
             echo "Automatic build of \`${short}\` on \`${GITHUB_REF_NAME}\` (${mc}, Forge)."
@@ -59,7 +59,7 @@ jobs:
             title="Artemis ${version} (build ${GITHUB_RUN_NUMBER}, ${GITHUB_REF_NAME})"
           fi
 
-          gh release create "$tag" "$asset" "$stable" \
+          gh release create "$tag" "$asset" \
             --target "$GITHUB_SHA" \
             --title "$title" \
             --notes-file notes.md \

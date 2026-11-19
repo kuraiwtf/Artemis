@@ -6,6 +6,7 @@
 
 [![Forge](https://img.shields.io/badge/Loader-Forge-darkgreen)](https://minecraftforge.net/)
 ![Modrinth Downloads](https://img.shields.io/modrinth/dt/artemis-mod?logo=modrinth&label=Downloads&color=00AF5C)
+[![Latest build](https://img.shields.io/github/v/release/kuraiwtf/Artemis?label=Latest%20build&logo=github)](https://github.com/kuraiwtf/Artemis/releases/latest)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/nqtsu91)
 
@@ -45,7 +46,11 @@ Here is a list of currently supported modules :
 
 ## Download 
 
-You can download this mod, and the associated plugin on [modrinth](https://modrinth.com/mod/lunar-artemis).
+**[Download the latest build (Forge 1.8.9)](https://github.com/kuraiwtf/Artemis/releases/latest/download/artemis-1.8.9.jar)**
+
+Every push to `main` is built and published automatically on the [releases page](https://github.com/kuraiwtf/Artemis/releases), which also keeps every previous build. Builds from other branches are marked as pre-releases.
+
+The original release of this mod, and the associated plugin, are on [modrinth](https://modrinth.com/mod/lunar-artemis).
 
 ## Important Note
 

@@ -4,13 +4,13 @@ import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import fr.natsu.artemis.module.glint.GlintState;
 import fr.natsu.artemis.module.model.ModelRegistry;
 import fr.natsu.artemis.render.JemItemRenderer;
-import fr.natsu.artemis.module.model.ModelRegistry;
 import fr.natsu.artemis.module.glint.GlintTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -25,6 +25,9 @@ public abstract class MixinRenderItem {
     @Invoker("renderModel")
     protected abstract void artemis$renderModel(IBakedModel model, int color);
 
+    @Invoker("renderEffect")
+    protected abstract void artemis$renderEffect(IBakedModel model);
+
     @Inject(
         method = "renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/resources/model/IBakedModel;)V",
         at = @At("HEAD"), cancellable = true, require = 0)
@@ -34,24 +37,38 @@ public abstract class MixinRenderItem {
         }
     }
 
-    @Inject(
+    /** Color of the item currently in {@code renderItem}, set by the {@code hasEffect} redirect. */
+    private int artemis$glintArgb = GlintState.NONE;
+
+    /**
+     * Apollo glint: an item carrying a {@code lunar.glint} tag gets a glint even when it is not
+     * enchanted, and the vanilla effect call below is swapped for the colored one.
+     */
+    @Redirect(
         method = "renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/resources/model/IBakedModel;)V",
-        at = @At("RETURN"))
-    private void artemis$coloredGlint(ItemStack stack, IBakedModel model, CallbackInfo ci) {
-        if (model == null || model.isBuiltInRenderer() || !GlintState.hasGlint(stack)) {
-            return;
-        }
-        if (ModelRegistry.findForItem(stack) != null) {
-            return;
-        }
-
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;hasEffect()Z"), require = 0)
+    private boolean artemis$glintHasEffect(ItemStack stack) {
         int argb = GlintState.glintArgb(stack);
+        if (argb != GlintState.NONE && ModelRegistry.findForItem(stack) != null) {
+            argb = GlintState.NONE;
+        }
+        this.artemis$glintArgb = argb;
+        return argb != GlintState.NONE || stack.hasEffect();
+    }
 
-        GlStateManager.pushMatrix();
-        GlStateManager.scale(0.5F, 0.5F, 0.5F);
-        GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-        artemis$renderColoredGlint(model, argb);
-        GlStateManager.popMatrix();
+    @Redirect(
+        method = "renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/resources/model/IBakedModel;)V",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/entity/RenderItem;renderEffect(Lnet/minecraft/client/resources/model/IBakedModel;)V"),
+        require = 0)
+    private void artemis$coloredGlint(RenderItem self, IBakedModel model) {
+        int argb = this.artemis$glintArgb;
+        this.artemis$glintArgb = GlintState.NONE;
+        if (argb == GlintState.NONE) {
+            this.artemis$renderEffect(model);
+        } else {
+            this.artemis$renderColoredGlint(model, argb);
+        }
     }
 
     private void artemis$renderColoredGlint(IBakedModel model, int argb) {
